@@ -1,0 +1,92 @@
+[
+    {
+        "model": "ecom_app.product", 
+        "pk": 1, 
+        "fields": {
+            "name": "Clorox", 
+            "price": "5.99", 
+            "description": "Clean your house", 
+            "category": 1
+        }
+    }, 
+    {
+        "model": "ecom_app.product", 
+        "pk": 2, 
+        "fields": {
+            "name": "Mops", 
+            "price": "10.50", 
+            "description": "Mop your floor real good", 
+            "category": 1
+        }
+    }, 
+    {
+        "model": "ecom_app.product", 
+        "pk": 3, 
+        "fields": {
+            "name": "Napkins", 
+            "price": "1.23", 
+            "description": "This will be useful to clean your kitchen", 
+            "category": 1
+        }
+    }, 
+    {
+        "model": "ecom_app.product", 
+        "pk": 4, 
+        "fields": {
+            "name": "Computer", 
+            "price": "150.00", 
+            "description": "Works well", 
+            "category": 3
+        }
+    }, 
+    {
+        "model": "ecom_app.product", 
+        "pk": 5, 
+        "fields": {
+            "name": "Keyboard", 
+            "price": "50.00", 
+            "description": "Best keyboard ever", 
+            "category": 3
+        }
+    }, 
+    {
+        "model": "ecom_app.product", 
+        "pk": 6, 
+        "fields": {
+            "name": "notebook", 
+            "price": "5.00", 
+            "description": "Nicely styled for clean formatting", 
+            "category": 3
+        }
+    }, 
+    {
+        "model": "ecom_app.product", 
+        "pk": 7, 
+        "fields": {
+            "name": "sunscreen", 
+            "price": "9.50", 
+            "description": "Stay white", 
+            "category": 2
+        }
+    }, 
+    {
+        "model": "ecom_app.product", 
+        "pk": 8, 
+        "fields": {
+            "name": "Visor", 
+            "price": "15.98", 
+            "description": "Stay white on face", 
+            "category": 2
+        }
+    }, 
+    {
+        "model": "ecom_app.product", 
+        "pk": 9, 
+        "fields": {
+            "name": "Bottle", 
+            "price": "10.00", 
+            "description": "Hydrate or die", 
+            "category": 2
+        }
+    }
+]

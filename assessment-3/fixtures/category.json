@@ -1,0 +1,23 @@
+[
+    {
+        "model": "ecom_app.category", 
+        "pk": 1, 
+        "fields": {
+            "title": "house"
+        }
+    }, 
+    {
+        "model": "ecom_app.category", 
+        "pk": 2, 
+        "fields": {
+            "title": "outdoors"
+        }
+    }, 
+    {
+        "model": "ecom_app.category", 
+        "pk": 3, 
+        "fields": {
+            "title": "professional"
+        }
+    }
+]
