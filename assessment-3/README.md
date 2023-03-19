@@ -30,10 +30,10 @@ Here is an example Product:
 | 2  | pencil  | 3             | 1.50 |
 
 Here is an example CartItem:
-| product_id  | quantity   |
-| ----------- | -----------|
-| 1           | 3          |
-| 2           | 10         | 
+| id | product_id  | quantity   |
+| --| ----------- | -----------|
+| 1 | 1           | 3          |
+| 2 | 2           | 10         | 
 
 
 Your website must allow the user to search for and browse products, and add products to their shopping cart.
