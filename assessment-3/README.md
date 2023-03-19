@@ -64,13 +64,6 @@ Your website must allow the user to search for and browse products, and add prod
         - Returns on DELETE `{"success": f"{name} has been deleted"}`
 
 
-
-#### **Search page**
-A user is able to search for a specific product by name.
-- Suggested route: `/search/<:search_string>`
-- Site navigation link to homepage.
-- If product exists, display product information. If product is not available, display an appropriate message. 
-
 ## Important Grading Information
 - Your assessment, regardless of completion status, must be submitted by the deadline. 
 
