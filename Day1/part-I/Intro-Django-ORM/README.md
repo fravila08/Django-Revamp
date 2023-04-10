@@ -9,8 +9,6 @@
 -   Link Django Project with Django Application and PostgreSQL
 -   Create your first Model in Django
 
-
-
 ## Lesson
 
 We just finished learning about PostgreSQL and have been able to successfully create various Data Bases and Data Tables of varying difficulty. Today we will learn how to create a Django Server and connect it to our PostgreSQL Database to manage our projects data.
@@ -26,7 +24,7 @@ Virtual environments are containers that wrap around your project to ensure that
 
 > When you create a virtual environment, you're installing another copy of python, with its own set of installed modules that are separate from other python modules you've installed previously. The virtual environment also includes an activation script, which adjusts your `PATH` so that when you type `python`, it refers to this new version of python instead. The activation script also defines a function called `deactivate()` that resets your `PATH` back to how it was before. As a convenience, the virtual environment also changes your shell prompt to include the name of the virtual environment, to help you avoid accidentally installing modules into the wrong virtual environment.
 
-Let's create a virtual environment whenever we work with Django so that it doesn't mess up the rest of our machine setups. The 3 commands that you need to remember:
+Let's create a virtual environment whenever we work with Django so that it doesn't mess up the rest of our machine setups. The 3 commands that you need to remember are:
 
 ```bash
 # 1. Create your virtual environment
@@ -47,7 +45,7 @@ deactivate
 
 ### Installing Django
 
-> Up until now, you may have seen a few built-in python modules used, both in python scripts (re, random, math) and at the command line (http, venv). Now, we're going to use `pip` to install django, a new python module, that we will use both from the command line, and in our scripts.
+> Up until now, you may have seen a few built-in python modules used, both in python scripts (re, random, math) and at the command line (http, venv). Now, we're going to use `pip` to install Django, a new python module, that we will use both from the command line, and in our scripts.
 
 ```bash
 pip install django
