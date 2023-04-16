@@ -1,6 +1,6 @@
 # Fields, Methods, Fixtures, Admin
 
-Earlier today we created a `Students` model, but we only touched the tip of the iceberg when it comes to model fields. Lets take it a step further and take a look at some useful fields, and validators.
+Earlier today we created a `Pokemon` model, but we only touched the tip of the iceberg when it comes to model fields. Lets take it a step further and take a look at some useful fields, and validators.
 
 
 ## Useful Model Fields
@@ -30,7 +30,7 @@ description = models.TextField()
 good_student = models.BooleanField()
 
 ```
-## Improving our Students Model
+## Improving our Pokemon Model
 
 Lets apply these fields to our student model with some default values and built in validators.
 
@@ -41,86 +41,78 @@ Lets take a look at our new and improved student object and what each argument m
 from django.db import models
 from django.utils import timezone
 
-class Students(models.Model):
-    # We don't want to provide a default value for a students name, but I want to specify that this field can't be blank nor can it be null
+# Create your models here.
+# models.Model tell Django this is a Model that should be reflected on our database
+class Pokemon(models.Model):
+    # CharField is a character field and has a default max length of 255 characters
     name = models.CharField(max_length=200, blank=False, null=False)
-    # By giving it the unique argument I'm telling my db no more than one field can have this email.
-    email = models.EmailField(unique = True)
+    # IntegerField will allow only solid numerical values as input
+    level = models.IntegerField(default=1)
     # We are providing a default to someone born Jan 1st 2008
-    date_of_birth = models.DateField(default="2008-01-01")
+    date_encountered = models.DateField(default="2008-01-01")
     # If a value is not provided we are stating the last time this student was at school was upon creation of the classes instance.
-    last_time_at_school = models.DateTimeField(default=timezone.now())
-    # Here I specify this point can't have more than 2 decimal points.
-    daily_allowance = models.DecimalField(max_digits = 5, decimal_places = 2, default=00.00)
-    # If no value is provided than the instance will be given the value of 10
-    year_of_schooling = models.IntegerField(default=10)
-    # If no value is provided the students description will be "Unkown"
+    date_captured = models.DateTimeField(default=timezone.now())
+    # If no value is provided the Pokemon description will be "Unkown"
     description = models.TextField(default="Unkown")
-    # Every Student is a Good student so we will set that as a default value.
-    good_student = models.BooleanField(default=True)
+    # We must catch them all.
+    captured = models.BooleanField(default = False)
 ```
 
-Lets enter psql and delete any prior instance of our Students Model before making our new migrations to ensure our updated fields don't conflict with any existing data.
-```bash
-    psql school_db
-    school_db=# DELETE FROM students_app_students;
-    DELETE 1
-    school_db=# \q
-```
 Lets make migrations and enter our Django Python Shell to create a couple of new instances.
+
 ```bash
-    # Migrate our updated Students Model
+    # Migrate our updated Pokemon Model
     python manage.py makemigrations
     python manage.py migrate
 
-    # Enter Django Python Shell and Create new Students
+    # Enter Django Python Shell and Create new Pokemon
     python manage.py shell
-    >>> from students_app.models import Students
-    >>> john = Students(name = 'John Avalos', email = 'john@gmail.com', daily_allowance = 2.50, year_of_schooling = 15, description = 'this is an amazingly bad student', good_student = False)
-    >>> john.save()
+    >>> from pokemon_app.models import Pokemon
+    >>> charizard = Pokemon(name = 'Charizard', level = 25, date_encountered = "2007-04-07", captured = True)
+    >>> charizard.save()
 
-    # If I print john now I'll see see a useless Students object
+    # If I print john now I'll see see a useless Pokemon object
     >>> print(john)
-    Students object (2)
+    Pokemon object (2)
     >>> exit()
 ```
 
 ## Adding class methods to our Models
 
-We just saw that printing an instance returns a `Students object (#)`, but we want to be able to actually see our students details. lets add a couple of methods to our Students Model to increase it's usefullness.
+We just saw that printing an instance returns a `Pokemon object (#)`, but we want to be able to actually see our Pokemon details. lets add a couple of methods to our Pokemon Model to increase it's usefullness.
 
 ```python
-    # DUNDER Method
+    # DUNDER METHOD
     def __str__(self):
-        return f"{self.name} is in his {self.year_of_schooling} year of schooling and { 'is' if self.good_student else 'is not' } a good student!"
-
-    # Adding the ability to increase a students allowance.
-    def increase_allowance(self, amount):
-        self.daily_allowance += amount
+        return f"{self.name} {'has been captured' if self.captured else 'is yet to be caught'}"
+    
+    # RAISES POKEMON'S LEVEL
+    def level_up(self):
+        self.level += 1
         self.save()
-
-    # Change a students 'good_student' status to the opposite of it's current value
-    def change_student_status(self):
-        self.good_student = not self.good_student
+        
+    # Switches Pokemon's captured status from True to False and vise versa
+    def change_caught_status(self):
+        self.captured = not self.captured
         self.save()
 ```
 
 We do not need to `makemigrations` for class methods, so lets go back into our Django Python Shell and test out these methods.
 
 ```python
-    >>> from students_app.models import Students
-    >>> students = Students.objects.all()
-    >>> print(students)
+    >>> from pokemon_app.models import Pokemon
+    >>> pokemon = Pokemon.objects.all()
+    >>> print(pokemon)
     # Now we see John Avalos dunder method
-    <QuerySet [<Students: John Avalos is in his 15 year of schooling and is not a good student!>]>
+    <QuerySet [<Pokemon: Pikachu is yet to be caught>, <Pokemon: Charizard has been captured>]>
     # lets update his good student status and watch his dunder method change.
-    >>> students[0].change_student_status()
-    >>> print(students)
+    >>> pokemon[0].change_caught_status()
+    >>> print(pokemon)
     # You can see the Dunder method has changed
-    <QuerySet [<Students: John Avalos is in his 15 year of schooling and is a good student!>]
-    # Lets add another Students instance and move onto fixtures
-    >>> new_student = Students(name = 'Jimmy Fallon', email = 'jimmy@gmail.com')
-    >>> new_student.save()
+    <QuerySet [<Pokemon: Charizard has been captured>, <Pokemon: Pikachu has been captured>]>
+    # Lets add another Pokemon instance and move onto fixtures
+    >>> blastoise = Pokemon(name = 'Blastoise', level = 37)
+    >>> blastoise.save()
 ```
 
 ## Fixtures
@@ -128,27 +120,37 @@ We do not need to `makemigrations` for class methods, so lets go back into our D
 When working in teams or in the development process, you may want to capture all existing data inside your projects database belonging to an app to later utilize further in case something happens to your database. This is where fixtures comes in.
 
 
-Before getting into creating JSON data, lets create a `fixtures` directory inside of our 'students_app' and a `student_data.json` inside of `fixtures`
+Before getting into creating JSON data, lets create a `fixtures` directory inside of our 'Pokemon_app' and a `pokemon_data.json` inside of `fixtures`
 
 ```bash
-    mkdir students_app/fixtures
-    touch students_app/fixtures/students_data.json
+    mkdir pokemon_app/fixtures
+    python manage.py dumpdata pokemon_app.Pokemon --indent 2 > pokemon_app/fixtures/pokemon_data.json
 ```
-- Dump Data: will dump all of your data in a JSON format.
+- You'll see that dumpdata created a new json file inside the fixtures directory 
 
-```bash 
-    python manage.py dumpdata students_app.Students
-
-    # will return an array of JSON objects with our students information
-    [{"model": "students_app.students", "pk": 2, "fields": {"name": "John Avalos", "email": "john@gmail.com", "date_of_birth": "2008-01-01", "last_time_at_school": "2023-04-09T05:48:14.774Z", "daily_allowance": "2.50", "year_of_schooling": 15, "description": "this is an amazingly bad student", "good_student": true}}, {"model": "students_app.students", "pk": 3, "fields": {"name": "Jimmy Fallon", "email": "jimmy@gmail.com", "date_of_birth": "2008-01-01", "last_time_at_school": "2023-04-09T06:12:32.480Z", "daily_allowance": "0.00", "year_of_schooling": 10, "description": "Unkown", "good_student": true}}]
+```json
+    # Will display each Pokemon Instance in json format
+[
+    {
+        "model": "pokemon_app.pokemon",
+        "pk": 1,
+        "fields": {
+            "name": "Pikachu",
+            "level": 12,
+            "date_encountered": "2008-01-01",
+            "date_captured": "2023-04-14T05:16:41.794Z",
+            "description": "Unkown",
+            "captured": true
+        }
+    }
+]
 ```
-- Now copy it and paste it onto the `students_data.json`. Now you could make alterations to your database without putting it's data at risk.
 
 - Load Data: will create an instance of a Model corresponding to the JSON object.
 
 ```bash
-    python manage.py loaddata students_data.json
-    Installed 2 object(s) from 1 fixture(s)
+    python manage.py loaddata pokemon_data.json
+    Installed 3 object(s) from 1 fixture(s)
 ```
 
 ## Django Admin Site
@@ -156,16 +158,16 @@ Before getting into creating JSON data, lets create a `fixtures` directory insid
 So far we've utilized the Django Shell to interact with our models, and although it works, it could definitely be more useful to have a more interactive site. That's where Django admin site comes in.
 
 
-First lets register our `Students Model` onto Django Admins Site.
+First lets register our `Pokemon Model` onto Django Admins Site.
 
 ```python
-    # students_app/admin.py
+    # Pokemon_app/admin.py
     from django.contrib import admin
-    # Explecit import of Students Model
-    from .models import Students
+    # Explecit import of Pokemon Model
+    from .models import Pokemon
 
     # Register your models here.
-    admin.site.register([Students])
+    admin.site.register([Pokemon])
 ```
 
 Now before entering our Admin Site with Django we must create a super user to log into our admin site and manipulate our models.
@@ -175,7 +177,7 @@ Now before entering our Admin Site with Django we must create a super user to lo
     # You'll be queried to provide a username, email, and password
 ```
 
-Finally we are ready to enter our Admin Site and interact with our `Students Model`.
+Finally we are ready to enter our Admin Site and interact with our `Pokemon Model`.
 
 ```bash
     python manage.py runserver

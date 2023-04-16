@@ -2,4 +2,4 @@ __pycache__
 environments
 .env
 .DS_Store
-
+.vscode

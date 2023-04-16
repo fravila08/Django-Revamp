@@ -59,10 +59,10 @@ pip install django
 python -m django
 ```
 
-> You should see a menu of options. You'll learn to use several of these options, but we won't need most of them. Don't worry about the warning about django-settings. We'll fix that in a second. Since we don't have a django project yet, let's start by creating one. Let's imagine we're creating an application for a school, so we'll name our project `school_project`.
+> You should see a menu of options. You'll learn to use several of these options, but we won't need most of them. Don't worry about the warning about django-settings. We'll fix that in a second. Since we don't have a django project yet, let's start by creating one. Let's imagine we're creating an application for a pokedex, so we'll name our project `pokedex_proj`.
 
 ```bash
-python -m django startproject school_project .
+python -m django startproject pokedex_proj .
 ```
 
 > When we start our project, django will create a folder with the name of the project. Inside of this project folder, django will create a subfolder for the main module of the project, which has the same name. Tomorrow, you'll learn about proper project organization and make other modules, but today we'll just be working with the main module.
@@ -79,18 +79,18 @@ pip freeze > requirements.txt
 ## Starting Django App
 
 
-> Django projects are split into many apps (i.e., a project has many apps). Imagine a new _project_ at Amazon where they are selling lots of space on the Moon. That _project_ requires a bunch of different _apps_ in order to run. For example, there might be a billing _app_ to collect money from individuals, a searching _app_ for people to look up lots, a VIP _app_ where they target VIPs, etc. Today, our project will just start with a `students_app` app.
+> Django projects are split into many apps (i.e., a project has many apps). Imagine a new _project_ at Amazon where they are selling lots of space on the Moon. That _project_ requires a bunch of different _apps_ in order to run. For example, there might be a billing _app_ to collect money from individuals, a searching _app_ for people to look up lots, a VIP _app_ where they target VIPs, etc. Today, our project will just start with a `pokemon_app` app.
 
 ```bash
-$ python manage.py startapp students_app
+$ python manage.py startapp pokemon_app
 ```
 
 > A quick sidebar - we ran `startproject` earlier and we are now running `startapp`. The difference between these two is that a `project` consists of many `apps`. An `app` can belong to many `projects`.
 
-Next, we need to add the `students_app` app to our `settings.py` file.
+Next, we need to add the `pokemon_app` app to our `settings.py` file.
 
 ```python
-## school_project/settings.py
+## pokedex_proj/settings.py
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -99,23 +99,23 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'polls_app',
+    'pokemon_app',
 ]
 ```
 ## Starting PostgreSQL with Django
 
 **Create a database**
 
-> Now our `school_project` project needs a database to manage all of its data through Django-ORM (NOT OPERATION RISK MANGEMENT BUT OBJECT RELATIONAL MAPPING). We'll be creating a `school_db` database with one table: `students`.
+> Now our `pokedex_proj` project needs a database to manage all of its data through Django-ORM (NOT OPERATION RISK MANGEMENT BUT OBJECT RELATIONAL MAPPING). We'll be creating a `pokedex_db` database with one table: `pokemon`.
 
 
 First we will create our database on PostgreSQL to later link onto our Django Project.
 
 ```bash
 # bash
-$ createdb school_db
+$ createdb pokedex_db
 # SQL
-CREATE DATABASE school_db;
+CREATE DATABASE pokedex_db;
 ```
 
 **Pyscopg3**
@@ -130,32 +130,34 @@ CREATE DATABASE school_db;
 > And then tell Django we want to use Postgres as our database instead of the default, SQLite3. We also tell it what database to attach to
 
 ```python
-## school_project/settings.py
-## our settings.py file is in the school directory, but if you named your project a different name, then look for that folder name.
+## pokedex_proj/settings.py
+## our settings.py file is in the pokedex directory, but if you named your project a different name, then look for that folder name.
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'school_db',
+        'NAME': 'pokedex_db',
     }
 }
 ```
 
 ## Creating First Model
 
-Lets create a `Students Model` in our `students_app/models.py` and input some data onto our newly created Data Table.
+Lets create a `Pokemon Model` in our `pokemon_app/models.py` and input some data onto our newly created Data Table.
 
 ```python
-## students_app/models.py
+## pokemon_app/models.py
 
 # models has many different methods we will utilize when creating our Models
 from django.db import models
+
+# Create your models here.
 # models.Model tell Django this is a Model that should be reflected on our database
-class Students(models.Model):
+class Pokemon(models.Model):
     # CharField is a character field and has a default max length of 255 characters
-    name = models.CharField(max_length=200)
-    # EmailField will check for the existence of a "@" and an ending of ".com/.org/etc."
-    email = models.EmailField(unique = True)
+    name = models.CharField(max_length=255)
+    # IntegerField will allow only solid numerical values as input
+    level = models.IntegerField(default=1)
 ```
 
 > We've created a Python class that directly maps to a database table (i.e., a model). Next, let's tell Django to create the necessary code for us to get this table into the database:
@@ -170,7 +172,7 @@ $ python manage.py makemigrations
 $ python manage.py migrate
 ```
 
-> We should have a `students_app_students` vehicle table in our db. Check it out with `psql school_db`
+> We should have a `pokemon_app_pokemon` vehicle table in our db. Check it out with `psql pokedex_db`
 
 **Django Console**
 
@@ -178,58 +180,60 @@ $ python manage.py migrate
 
 ```bash
 python manage.py shell
-from students_app.models import Students
+>>> from pokemon_app.models import Pokemon
 ```
 
 > The shell will allow us to load in our models from Django. Once in the shell, we can create a new student.
 
-```bash
-In [1]: student = Students(name = 'John Avalos', email = 'john@gmail.com')
-In [2]: student.save()
+```python
+>>> pikachu = Pokemon(name = 'Pikachu', level = 12)
+>>> pikachu.save()
 ```
 
-> This should look familiar - the object oriented lessons from weeks 2 and 3 were in preparation for this. Just by writing those two lines of code, we are able to instantiate a Students object for us and save it into the database. Under the hood, it's just running:
+> This should look familiar - the object oriented lessons from weeks 2 and 3 were in preparation for this. Just by writing those two lines of code, we are able to instantiate a pokemon object for us and save it into the database. Under the hood, it's just running:
 
 ```sql
-INSERT into students (name, email) VALUES ("John Avalos", "john@gmail.com")
+INSERT into pokemon (name, level) VALUES ("John Avalos", 12)
 ```
 
 > Now we can query our database using Python and see our new record.
 
-```bash
-In [3]: Students.objects.all()
-# Same as SELECT * from vehicles;
+```python
+>>> Pokemon.objects.all()
+# Same as SELECT * FROM pokemon;
 
 # We should expect the following:
-<QuerySet [<Students: Students object (1)>]>
+<QuerySet [<Pokemon: Pokemon object (1)>]>
 ```
 
 > You should get back a query object. Exit the shell by typing `exit()`. Let's confirm that our new record got saved in our Postgres db.
 
 ```bash
-$ psql car_shop_db
+$ psql pokedex_db
 psql (11.1, server 9.6.3)
 Type "help" for help.
 
-school_db=# \d
+pokedex_db=# \d
                           List of relations
  Schema |               Name                |   Type   |     Owner
 --------+-----------------------------------+----------+---------------
  ...    |   ...........                     |   ...    |    ........
  public | django_session                    | table    | codingisawesome
- public | students_app_students             | table    | codingisawesome
- public | students_app_students_id_seq      | sequence | codingisawesome
+ public | pokemon_app_pokemon             | table    | codingisawesome
+ public | pokemon_app_pokemon_id_seq      | sequence | codingisawesome
 
 ```
 
 > Django creates our database tables with the app name first, followed by the app name. Before we even wrote our own models, there were many built-in tables here, named after the built-in apps in Django, such as `admin`, `auth`, and `sessions`. Also, take note of the `django-migrations` table, which django manages automatically in order to keep track of which migrations have already been run. Our app's table is `attendance_app_student`. Let's query for the records in that table and see what we get.
 
 ```bash
-school_db=# select * from students_app_students;
- id |    name     |     email      
-----+-------------+----------------
-  1 | John Avalos | john@gmail.com
+pokedex_db=# SELECT * FROM pokemon_app_pokemon;
+ id |  name   | level 
+----+---------+-------
+  1 | Pikachu |    12
 (1 row)
+
+pokedex_db=# 
 ```
 ## External Resources
 

@@ -1,0 +1,38 @@
+[
+{
+  "model": "pokemon_app.pokemon",
+  "pk": 1,
+  "fields": {
+    "name": "Pikachu",
+    "level": 12,
+    "date_encountered": "2008-01-01",
+    "date_captured": "2023-04-14T05:16:41.794Z",
+    "description": "Unkown",
+    "captured": true
+  }
+},
+{
+  "model": "pokemon_app.pokemon",
+  "pk": 2,
+  "fields": {
+    "name": "Charizard",
+    "level": 25,
+    "date_encountered": "2007-04-07",
+    "date_captured": "2023-04-14T05:17:16.178Z",
+    "description": "Unkown",
+    "captured": true
+  }
+},
+{
+  "model": "pokemon_app.pokemon",
+  "pk": 3,
+  "fields": {
+    "name": "Blastoise",
+    "level": 37,
+    "date_encountered": "2008-01-01",
+    "date_captured": "2023-04-14T05:26:47.309Z",
+    "description": "Unkown",
+    "captured": false
+  }
+}
+]
