@@ -1,0 +1,54 @@
+[
+{
+  "model": "pokemon_app.pokemon",
+  "pk": 1,
+  "fields": {
+    "name": "Pikachu",
+    "level": 12,
+    "date_encountered": "2008-01-01",
+    "date_captured": "2023-04-14T05:16:41Z",
+    "description": "Pikachu is an electric type pokemon who needs a thrunder stone to evolve into Raichu.",
+    "captured": true,
+    "moves": [
+      13,
+      4,
+      12
+    ]
+  }
+},
+{
+  "model": "pokemon_app.pokemon",
+  "pk": 2,
+  "fields": {
+    "name": "Charizard",
+    "level": 25,
+    "date_encountered": "2007-04-07",
+    "date_captured": "2023-04-14T05:17:16Z",
+    "description": "A fire type pokemon with Dragon like features and capabilities.",
+    "captured": true,
+    "moves": [
+      2,
+      5,
+      6,
+      7
+    ]
+  }
+},
+{
+  "model": "pokemon_app.pokemon",
+  "pk": 3,
+  "fields": {
+    "name": "Blastoise",
+    "level": 37,
+    "date_encountered": "2008-01-01",
+    "date_captured": "2023-04-14T05:26:47Z",
+    "description": "A water type pokemon with two hydro cannons sticking out of it's shell",
+    "captured": false,
+    "moves": [
+      11,
+      9,
+      3
+    ]
+  }
+}
+]

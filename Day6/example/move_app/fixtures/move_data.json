@@ -1,0 +1,145 @@
+[
+{
+   "model": "move_app.move",
+   "pk": 1,
+   "fields": {
+      "name": "Psychic",
+      "accuracy": 70,
+      "maxPP": 20,
+      "pp": 20,
+      "power": 80
+   }
+},
+{
+   "model": "move_app.move",
+   "pk": 2,
+   "fields": {
+      "name": "Wing Attack",
+      "accuracy": 70,
+      "maxPP": 20,
+      "pp": 20,
+      "power": 70
+   }
+},
+{
+   "model": "move_app.move",
+   "pk": 3,
+   "fields": {
+      "name": "Water Pulse",
+      "accuracy": 70,
+      "maxPP": 20,
+      "pp": 20,
+      "power": 80
+   }
+},
+{
+   "model": "move_app.move",
+   "pk": 4,
+   "fields": {
+      "name": "Shock Wave",
+      "accuracy": 100,
+      "maxPP": 20,
+      "pp": 20,
+      "power": 80
+   }
+},
+{
+   "model": "move_app.move",
+   "pk": 5,
+   "fields": {
+      "name": "Dragon Pulse",
+      "accuracy": 70,
+      "maxPP": 10,
+      "pp": 5,
+      "power": 120
+   }
+},
+{
+   "model": "move_app.move",
+   "pk": 6,
+   "fields": {
+      "name": "Fly",
+      "accuracy": 70,
+      "maxPP": 20,
+      "pp": 20,
+      "power": 80
+   }
+},
+{
+   "model": "move_app.move",
+   "pk": 7,
+   "fields": {
+      "name": "Cut",
+      "accuracy": 70,
+      "maxPP": 20,
+      "pp": 20,
+      "power": 80
+   }
+},
+{
+   "model": "move_app.move",
+   "pk": 8,
+   "fields": {
+      "name": "Rock Throw",
+      "accuracy": 70,
+      "maxPP": 20,
+      "pp": 20,
+      "power": 80
+   }
+},
+{
+   "model": "move_app.move",
+   "pk": 9,
+   "fields": {
+      "name": "Pound",
+      "accuracy": 70,
+      "maxPP": 20,
+      "pp": 20,
+      "power": 70
+   }
+},
+{
+   "model": "move_app.move",
+   "pk": 10,
+   "fields": {
+      "name": "Psybeam",
+      "accuracy": 70,
+      "maxPP": 20,
+      "pp": 20,
+      "power": 80
+   }
+},
+{
+   "model": "move_app.move",
+   "pk": 11,
+   "fields": {
+      "name": "Blizzard",
+      "accuracy": 60,
+      "maxPP": 10,
+      "pp": 5,
+      "power": 120
+   }
+},
+{
+   "model": "move_app.move",
+   "pk": 12,
+   "fields": {
+      "name": "Thunder Bolt",
+      "accuracy": 70,
+      "maxPP": 20,
+      "pp": 20,
+      "power": 100
+   }
+},
+{
+   "model": "move_app.move",
+   "pk": 13,
+   "fields": {
+      "name": "Lightning",
+      "accuracy": 70,
+      "maxPP": 20,
+      "pp": 20,
+      "power": 120
+   }
+}
+]
