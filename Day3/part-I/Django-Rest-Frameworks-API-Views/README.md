@@ -2,7 +2,7 @@
 
 ## Lesson
 
-So far we've created Students, Exchange_Student, and School Models utilizing Django-ORM with associations, validators, and tests. Although it's been great we still haven't talked about why we are utilizing Django-ORM to interact with our database. Django is a powerful Back-End framework that we will utilize to host our Application Programming Interface for our Full-Stack-Applications. Today we are going to begin creating `views` to interact with our models and return the data we desire.
+So far we've created Pokemon and Moves utilizing Django-ORM with associations, validators, and tests. Although it's been great we still haven't talked about why we are utilizing Django-ORM to interact with our database. Django is a powerful Back-End framework that we will utilize to host our Application Programming Interface for our Full-Stack-Applications. Today we are going to begin creating `views` to interact with our models and return the data we desire.
 
 ## Things to consider when creating our API Views
 
@@ -15,42 +15,96 @@ So far we've created Students, Exchange_Student, and School Models utilizing Dja
 
 To create our API views we will utilize [django-rest-frameworks](https://www.django-rest-framework.org/) to interact with our requests and deliver effective responses.
 
-First lets create a view that will get all of our existing schools, here's an example of what we would expect it to look:
-
-```js
-{'schools': [{'id': 1, 'name': 'Code Platoon'}, {'id': 2, 'name': 'Code Academy'}]}
-```
-Lets install [django-rest-frameworks](https://www.django-rest-framework.org/) and go into school_app/views.py to create our API view.
+Lets install [django-rest-frameworks](https://www.django-rest-framework.org/) and go into pokemon_app/views.py to create our API view.
 
 ```bash
     # Install Django Rest Frameworks
     pip install djangorestframework
+    # add it to requirements.txt
+    pip freeze > requirements.txt
+```
+
+First lets create a view that will get all of our existing pokemon. Here's an example of what we would expect it to look:
+
+```js
+[
+    {
+        "model": "pokemon_app.pokemon",
+        "pk": 1,
+        "fields": {
+            "name": "Pikachu",
+            "level": 12,
+            "date_encountered": "2008-01-01",
+            "date_captured": "2023-04-14T05:16:41.794Z",
+            "description": "Unkown",
+            "captured": true,
+            "moves": [
+                1
+            ]
+        }
+    },
+    {
+        "model": "pokemon_app.pokemon",
+        "pk": 2,
+        "fields": {
+            "name": "Charizard",
+            "level": 25,
+            "date_encountered": "2007-04-07",
+            "date_captured": "2023-04-14T05:17:16.178Z",
+            "description": "Unkown",
+            "captured": true,
+            "moves": []
+        }
+    },
+    {
+        "model": "pokemon_app.pokemon",
+        "pk": 3,
+        "fields": {
+            "name": "Blastoise",
+            "level": 37,
+            "date_encountered": "2008-01-01",
+            "date_captured": "2023-04-14T05:26:47.309Z",
+            "description": "Unkown",
+            "captured": false,
+            "moves": []
+        }
+    }
+]
 ```
 Lets create our view
 
 ```python 
-# school_app/views.py
-
-# Import APIView and to create our views 
-from rest_framework.views import APIView, Response
-# and Response to return JSON responses
+# pokemon_app/views.py
 from django.shortcuts import render
-# Import School model
-from .models import School
+# We will import the following to read and return JSON data more efficiently
+from rest_framework.views import APIView, Response
+# We want to bring in our model
+from .models import Pokemon
+# We will utilize serializer to turn our QuerySets into 
+# binary string
+from django.core.serializers import serialize
+# Json.loads will turn binary strings into JSON data
+import json
 
 # Create your views here.
-class School_Interactions(APIView):
-    # Specify the type of request that should trigger this behavior
+class All_pokemon(APIView):
+    # Establish the method that will trigger this behavior
     def get(self, request):
-        # Grab all instances of the School Table and cast it into a list of dictionaries
-        all_schools = list(School.objects.all().values())
-        # Sort the list of dictionaries by the key of id
-        sorted_schools = sorted(all_schools, key=lambda x: x['id'])
-        # Return JSON response
-        return Response({'schools' : sorted_schools})
+        # Grab all Pokemon existing within our database in a
+        # specific order to keep consistency. In this case
+        # we will order our data by name in aphabetical order
+        pokemon = Pokemon.objects.all().order_by('name')
+        # we can't send back query sets as a valid JSON response
+        # so we will utilize Django's built in serialize function
+        # to turn our query set into a binary string
+        serialized_pokemon = serialize('json', pokemon)
+        # Now we can use the python json.loads function to turn 
+        # our binary string into a workable json format
+        json_pokemon = json.loads(serialized_pokemon)
+        return Response(json_pokemon)
 ```
 
-Now we can move onto our urls and establish a couple of endpoints to start we will go onto our projects urls.py and include our school_app urls.
+Now we can move onto our urls and create our endpoints that will trigger this view we created
 
 ```python 
 from django.contrib import admin
@@ -60,72 +114,71 @@ from django.urls import path, include
 # enpoints should be nouns and pluralized
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # now we can interact with school_app urls
-    path('api/v1/schools/', include("school_app.urls")),
+    # now we can interact with pokemon_app urls
+    path('api/v1/pokemon/', include("pokemon_app.urls")),
 ]
 ```
 
-We are telling our project to include school_app/urls.py but currently there is no urls.py file in our school_app. Lets make one and add an empty url enpoint.
+We are telling our project to include pokemon_app/urls.py but currently there is no urls.py file in our pokemon_app. Lets make one and add an empty url enpoint.
 
 ```python
-# school_app/urls.py
+# pokemon_app/urls.py
 
 from django.urls import path
-# Explicitly import School_Interactions
-from .views import School_Interactions
-
-# Remember all urls are prefaced by http://localhost:8000/api/v1/schools/
+# Explicit imports
+from .views import All_pokemon
+# Remember all urls are prefaced by http://localhost:8000/api/v1/pokemon/
 urlpatterns = [
     # Currently only takes GET requests
-    path('', School_Interactions.as_view(), name = 'all_schools'),
+    path('', All_pokemon.as_view(), name='all_pokemon')
 ]
 ```
 
 
-Now that we are done with school_app lets move on to Students and get all students and Exchange Students.
+Now that we are done with pokemon_app lets move on to Moves and grab all moves currently created.
 
 ```js
-{
-    'students': [
-        [ 
-            {'id': 2, 'name': 'John Avalos', 'email': 'john@gmail.com', 'date_of_birth': datetime.date(2008, 1, 1), 'last_time_at_school': datetime.datetime(2023, 4, 9, 5, 48, 14, 774000, tzinfo=datetime.timezone.utc), 'daily_allowance': Decimal('2.50'), 'year_of_schooling': 15, 'description': 'this is an amazingly bad student', 'good_student': True, 'school_id': 1}, 
-            {'id': 3, 'name': 'Jimmy Fallon', 'email': 'jimmy@gmail.com', 'date_of_birth': datetime.date(2008, 1, 1), 'last_time_at_school': datetime.datetime(2023, 4, 9, 6, 12, 32, 480000, tzinfo=datetime.timezone.utc), 'daily_allowance': Decimal('0.00'), 'year_of_schooling': 10, 'description': 'Unkown', 'good_student': True, 'school_id': 1}, 
-            {'id': 4, 'name': 'Nick Cage', 'email': 'nick@gmail.com', 'date_of_birth': datetime.date(2008, 1, 1), 'last_time_at_school': datetime.datetime(2023, 4, 10, 5, 47, 58, tzinfo=datetime.timezone.utc), 'daily_allowance': Decimal('0.00'), 'year_of_schooling': 2, 'description': 'Nick Cage is an excellent student that gives his classes everything he can all the time every time.', 'good_student': True, 'school_id': 1}], [
-            {'id': 4, 'name': 'Nick Cage', 'email': 'nick@gmail.com', 'date_of_birth': datetime.date(2008, 1, 1), 'last_time_at_school': datetime.datetime(2023, 4, 10, 5, 47, 58, tzinfo=datetime.timezone.utc), 'daily_allowance': Decimal('0.00'), 'year_of_schooling': 2, 'description': 'Nick Cage is an excellent student that gives his classes everything he can all the time every time.', 'good_student': True, 'school_id': 1, 'students_ptr_id': 4}
-        ]
-    ]
-}
+[
+    {
+        "model": "move_app.move",
+        "pk": 1,
+        "fields": {
+            "name": "Psychic",
+            "accuracy": 70,
+            "maxPP": 20,
+            "pp": 20,
+            "power": 80
+        }
+    }
+]
 ```
 
-Lets create our view to grab all students
+Lets create our view to grab all moves
 
 ```python 
-# Import APIView and to create our views 
-from rest_framework.views import APIView, Response
-# and Response to return JSON responses
+# pokemon_app/views.py l
 from django.shortcuts import render
-# Import School model
-from school_app.models import School
-# Import both Students and Exchange_Students
-from .models import Students, Exchange_Students
-# Create your views here.
+# We will import the following to read and return JSON data more efficiently
+from rest_framework.views import APIView, Response
+# We want to bring in our model
+from .models import Move
+# serialize will turn querysets into binary string
+from django.core.serializers import serialize
+# Json will turn binary string into JSON readable data
+import json
 
-class All_Students(APIView):
-    
+# Create your views here.
+class All_moves(APIView):
+    # specify which request method should trigger this behavior
     def get(self, request):
-        # Get all students and exchange students as lists of dictionaries
-        students = list(Students.objects.all().values())
-        exchange_students = list(Exchange_Students.objects.all().values())
-        # Sort both students and exchange students by id
-        sorted_students = sorted(students, key=lambda x : x['id'])
-        sorted_exchange_students = sorted(exchange_students, key=lambda x : x['id'])
-        # Create a list of both sorted lists 
-        all_students = [sorted_students, sorted_exchange_students]
-        # Return a JSON Response of both students and Exchange_Students
-        return Response({"students" : all_students})
+        # grab a binary string of all Moves in the DB ordered by name
+        moves = serialize('json', Move.objects.all().order_by('name'))
+        # utilize json.loads to turn moves into JSON Data
+        moves = json.loads(moves)
+        return Response(moves)
 ```
 
-Then add students_app/urls.py to our projects urls
+Then add move_app/urls.py to our projects urls
 
 ```python
 from django.contrib import admin
@@ -134,23 +187,41 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v1/schools/', include("school_app.urls")),
-    # include student_app urls.py file
-    path('api/v1/students/', include("students_app.urls")),
+    path('api/v1/pokemon/', include("pokemon_app.urls")),
+    # include move_app urls.py file
+    path('api/v1/moves/', include("move_app.urls")),
 ]
 ```
 
-And finally lets link our student_app/urls.py with our view
+And finally lets link our move_app/urls.py with our view
 
 ```python
 # students_app/urls.py
 
 from django.urls import path
-# Import All_Students
-from .views import All_Students
+# Import All_
+from .views import All_moves
 
-# remember all urls are prefaced by http://localhost:8000/api/v1/students/
+# remember all urls are prefaced by http://localhost:8000/api/v1/moves/
 urlpatterns = [
-    path('', All_Students.as_view(), name = 'all_students')
+    path('', All_moves.as_view(), name='all_views')
 ]
+```
+
+## Intro to Postman
+
+**What is Postman?** Postman is an API platform for building and using APIs. Postman simplifies each step of the API lifecycle and streamlines collaboration so you can create better APIs—faster
+
+
+We can utilize Postman to test our api and send `GET` request to the current urls we've established. First we must run the server to ensure our information is accessible through local host.
+
+```bash
+    python manage.py runserver
+```
+
+Now in Postman send GET requests to the following url paths:
+
+```http
+ http://127.0.0.1:8000/api/v1/pokemon/
+ http://127.0.0.1:8000/api/v1/moves/
 ```
