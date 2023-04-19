@@ -21,8 +21,19 @@ class All_moves(APIView):
 
 
 class Selected_move(APIView):
+    
+    def get_a_move(self, name):
+        return Move.objects.get(name = name.title())
 
     def get(self, request, name):
-        move = serialize('json', [Move.objects.get(name = name.title())])
+        move = serialize('json', [self.get_a_move(name)])
         move = json.loads(move)
+        return Response(move)
+    
+    def put(self, request, name):
+        move = self.get_a_move(name)
+        move.pp = request.data['pp']
+        move.full_clean()
+        move.save()
+        move = json.loads(serialize('json', [move]))
         return Response(move)
