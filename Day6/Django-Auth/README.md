@@ -8,58 +8,32 @@
 
 ## Lesson
 
-> Yesterday, we learned how to manually sign up and log in users. This was a good learning experience, but it took a lot of effort, and probably wasn't perfectly secure. Today, we'll be learning about some of the tools that django provides that will help us conveniently, securely manage our users.
-
-### Database setup
-
-> We'll be using postgres for our app today. Let's declare our database in our `settings.py`, and then run the migrations.
-
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'django_auth',
-    }
-}
-```
-
-```bash
-python manage.py migrate
-```
+> Today we will learn how to add Users to our API's and how to create relationships between our users and pokemon.
 
 ### The User Model
 
-> Yesterday, we manually created our own model for users, called `AppUser`. Fortunately, django provides a built-in `User` model that provides much of the functionality that we built yesterday. Unfortunately, the default fields on the user model are very generic, and probably don't meet all of our application's needs. We'll need to extend the built-in `User` model to accommodate custom attributes for our application. There are a few options for doing this:
+> We will create a subclass of django's built-in `AbstractUser` class. This is a full, functional user model, that we can also extend with custom properties. We'll use this option today to get a balance between convenience and flexibility.
 
-- One option is to use the built-in user model with all of the default settings, and then create another model, called a 'profile model', that has a OneToOne relationship with the `User` model.
+> Let's go ahead and create a trainer_app to track all of our users/trainers that have accounts on our API. Don't forget to add the app under installed_apps in the projects settings.py
 
-  ```python
-  from django.contrib.auth.models import User
-
-  class Employee(models.Model):
-      user = models.OneToOneField(User, on_delete=models.CASCADE)
-      department = models.CharField(max_length=100)
-  ```
-
-- Another option is to create a subclass of django's built-in `AbstractBaseUser` class. This lets us use django's authentication features, but requires us to define all the fields our user needs.
-- The third option is to create a subclass of django's built-in `AbstractUser` class. This is a full, functional user model, that we can also extend with custom properties. We'll use this option today to get a balance between convenience and flexibility.
+```bash
+    python manage.py startapp trainer_app
+```
 
   ```python
   from django.db import models
-  from django.contrib.auth.models import (AbstractUser)
+  from django.contrib.auth.models import AbstractUser
 
   # Inheriting from 'AbstractUser' lets us use all the fields of the default User,
   # and overwrite the fields we need to change
   # This is different from 'AbstractBaseUser', which only gets the password management features from the default User,
   # and needs the developer to define other relevant fields.
-  class AppUser(AbstractUser):
+  class Trainer(AbstractUser):
       email = models.EmailField(
           verbose_name='email address',
           max_length=255,
           unique=True,
       )
-      is_active = models.BooleanField(default=True)
-
       # notice the absence of a "Password field", that is built in.
 
       # django uses the 'username' to identify users by default, but many modern applications use 'email' instead
@@ -70,136 +44,171 @@ python manage.py migrate
 > Since we're not using the default, built-in User model, we have to tell django which model we're using for our users in the settings.py file.
 
 ```python
-AUTH_USER_MODEL = 'blog.AppUser'
+# pokedex_proj/settings.py
+AUTH_USER_MODEL = 'trainer_app.Trainer'
 ```
+> Finally we can `makemigrations` and `migrate` our model into our database
 
 ### Sign up, Log in, Log out
 
-> Now that we've defined our user model by extending `AbstractUser`, we can define views that leverage django's built-in authentication functionality. First, let's define some URLs for the views we'll create.
+> Now that we've defined our user model by extending `AbstractUser`, we can define views that leverage django's built-in authentication functionality. First, let's define a URL for the views we'll create.
 
 ```python
 from django.urls import path
-from . import views
-
+from .views import Trainer_log
 
 urlpatterns = [
-    path('signup', views.sign_up),
-    path('login', views.log_in),
-    path('logout', views.log_out),
-    path('whoami', views.who_am_i),
+    path('', Trainer_log.as_view(), name='trainer_log')
 ]
 ```
 
-> Now let's create a view for our sign-up route
+> Now lets start creating our API view, note we aren't doing any CRUD activity here so our entire user functionalities will fall under the POST and GET method only. 
 
 ```python
-from django.views.decorators.csrf import csrf_exempt
-
+# trainer_app/views.py
+from rest_framework.views import APIView, Response
 from django.contrib.auth import authenticate, login, logout
-from .models import AppUser as User
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django.core.serializers import serialize
+from .models import Trainer
+import json
 
 
-@csrf_exempt
-def sign_up(request):
-    try:
-        body = json.loads(request.body)
-        User.objects.create_user(username=body['username'], password=body['password'], email=body['username'])
-    except Exception as e:
-        print('oops!')
-        print(str(e))
-    return HttpResponse('hi')
-```
+# Create your views here.
+@method_decorator(login_required, 'get')
+class Trainer_log(APIView):
 
-> And we'll add a little javascript on the front-end to send the sign-up request.
+    def post(self, request):
+        # we can see what user is making the request if any is logged in when the request was made
+        # otherwise we will see an AnonymousUser instance
+        print(request.user)
+        # will return True if a user is making the request and False for AnonymousUser
+        if request.user.is_authenticated:
+            # in the case it returns true we would know that a logged in user is pinging this endpoint
+            # this means the behavior they're looking for is log_out
+            logout(request)
+            return Response({"log_out":True})
+        else:
+            # in this case an anonymous user has made the request so lets try to see if we are creating or getting a user
+            # by asking django to authenticate the current email and password to a user in our database
+            trainer = authenticate(username=request.data['email'], password=request.data['password'])
+            if trainer is not None and trainer.is_active:
+                # if the authentication was successful it means a user in our databse exist with these
+                # credentials and is trying to log_in
+                login(request, trainer)
+                return Response({"log_in":True})
+            else:
+                # When trainer fails to be authenticated it means there's no trainer existing with this credentials
+                # this means the user is trying to sign up for our API
+                Trainer.objects.create_user(**request.data)
+                return Response({"sign_up":True})
 
-```javascript
-axios
-  .post("/sign-up", {
-    username: "jeffbezos",
-    password: "dragons",
-  })
-  .then((response) => {
-    console.log("response", response);
-  });
+    # what if our user wants to know their current information
+    # first we want to ensure whomever is making this get request is a valid and logged in 
+    # user so we will utilize the login_required decorator which was set by the method decorator
+    # at the top of the class
+    def get(self, request):
+        trainer = Trainer.objects.get(id = request.user.id)
+        trainer = json.loads(serialize("json", [trainer], fields=["email", "name", "pokemon"]))
+        # we want the user to actually see their pokemon so we have to replace the
+        # keys being returned with the Pokemon themselves
+        trainer[0]['fields']['pokemon'] = json.loads(serialize('json', request.user.pokemon.all()))
+        # again we don't want to just have keys instead we will have to iterate through and 
+        # grab each Move instance
+        for pokemon in trainer[0]['fields']['pokemon']:
+            for move in range(len(pokemon['fields']['moves'])):
+                id = pokemon['fields']['moves'][move]
+                pokemon['fields']['moves'][move] = json.loads(serialize('json', [Move.objects.get(id = id)]))[0]
+        return Response(trainer)
 ```
 
 > Django handles all the password hashing in one line of code, which is very convenient. If we want to see what django just created for us, let's look in the database.
 > Notice that their plain-text password is not included in their record. The password field contains their password hash, which also contains the hashing algorithm and the salt, separated by `$`. Some of the other fields are empty, because they exist by default, but we never set them. Some of the fields will be automatically set by django, however. The fields `date_joined` and `last_login` are updated automatically, like you'd expect. The field `is_active` defaults to True. If you need to delete a user, you should set this to False instead of actually deleting the user. Modern applications rarely permanently delete data, but instead mark items as 'deleted' so that they can be ignored by other queries. Especially for users, it's important to never delete their database record, in case they want to reactivate their account, or if they had connections to other users.
 
-```sql
-full_stack_app=# select * from blog_appuser\gx
--[ RECORD 1 ]+-----------------------------------------------------------------------------------------
-id           | 1
-password     | pbkdf2_sha256$320000$vL9X7Gu4p2DMqgXkS02N55$ekvH4pqodQhbgbW55mCFHHLd1jr/p+mKqw3NOcO6bdQ=
-last_login   |
-is_superuser | f
-username     | jeffbezos
-first_name   |
-last_name    |
-is_staff     | f
-date_joined  | 2022-03-16 11:28:07.292569-05
-email        | jeffbezos
-is_active    | t
-```
+## Handling Super Users
+> Now that we've created an `AbstractUser` you'll notice you can't log into the Django Admin page to manage your database. This is because Django's default superuser is no longer active for this project. Now we will have to manually handle this by creating a seperate view that will specifically trigger the creation of admin users.
 
-> If we need to log in an existing user, django provides some functions, `authenticate` and `login`, that help us do that.
+
+> Let's create a view and url path to create a Master_Trainer
 
 ```python
-@csrf_exempt
-def log_in(request):
-    body = json.loads(request.body)
-    email = body['email']
-    password = body['password']
+    path('master/', Master_Sign_Up.as_view(), name='master')
 
-    # remember, we told django that our email field is serving as the 'username'
-    # this doesn't start a login session, it just tells us which user from the db belongs to these credentials
-    user = authenticate(username=email, password=password)
-    if user is not None:
-        if user.is_active:
-            try:
-                login(request, user)
-            except Exception as e:
-                print('oops!')
-                print(str(e))
-            return HttpResponse('success!')
-            # Redirect to a success page.
-        else:
-            return HttpResponse('not active!')
-            # Return a 'disabled account' error message
-    else:
-        return HttpResponse('no user!')
-        # Return an 'invalid login' error message.
+    class Master_Sign_Up(APIView):
+
+        def post(self, request):
+            master_trainer = Trainer.objects.create_user(**request.data)
+            master_trainer.is_staff = True
+            master_trainer.is_superuser = True
+            master_trainer.save()
+            return Response({"sign_up_master": True})
 ```
+> Finally we could create a master_trainer through postman, register the Trainer model onto the admin site, and log into Django Admin.
 
-> Logging out is even simpler.
+## Relationships
+
+> Now we have the ability to have users, so maybe we would like users to be able to capture pokemon. Lets add the following fields to our Trainer model.
 
 ```python
-@csrf_exempt
-def log_out(request):
-    logout(request)
-    return HttpResponse('Logged you out!')
+    name = models.CharField(max_length=250, default='Unknown')
+    pokemon = models.ManyToManyField(Pokemon)
 ```
 
-> If a logged in user sends a request to the server, you can access information about the user at `request.user`. This is much more convenient than manually looking them up from the database.
+> We've added these two fields so lets reflect them in the GET method for the Trainer_log class.
 
 ```python
-@csrf_exempt
-def who_am_i(request):
-    print(dir(request.user))
-    if request.user.is_authenticated:
-        return JsonRespnse({
-            'email': request.user.email
-        })
-    else:
-        return JsonResponse({'user':None})
+
+def get(self, request):
+    # Notice we've added both name and pokemon to the fields list
+    trainer = json.loads(serialize("json", [request.user], fields=["email", "name", "pokemon"]))
+    return Response(trainer)
 ```
+
+> Finally let's create a class and url path allowing us to get our pokemon relationships, and put or delete pokemon to and from our pokemon relationship.
+
+```python
+#url paths
+    # GET 
+    path('pokemon/', Trainer_pokemon.as_view(), name='all_trainers_pokemon'),
+    # PUT and DELETE
+    path('pokemon/<int:pokemon_id>/', Trainer_pokemon.as_view(), name='add_or_sub_a_pokemon'),
+
+# view
+# dispatch means all request to this view will require the user to be logged in
+@method_decorator(login_required, 'dispatch')
+class Trainer_pokemon(APIView):
+    
+    def get(self, request):
+        # user already holds all pokemon instances we just 
+        # need to grab them from request.user
+        pokemon= request.user.pokemon.all()
+        pokemon = json.loads(serialize('json', pokemon))
+        return Response(pokemon)
+    
+    def put(self, request, pokemon_id):
+        # request.user is a set that takes in pokemon Ids/Pks
+        request.user.pokemon.add(pokemon_id)
+        request.user.save()
+        # we don't want to return the number on so we need to grab this 
+        # pokemon from the database
+        pokemon = Pokemon.objects.get(id = pokemon_id)
+        return Response(f"{pokemon.name} has been added to your team")
+    
+    def delete(self, request, pokemon_id):
+        # resquest.user.pokemon is a set of numbers that can utilize remove to 
+        # delete an id/pk from the set
+        request.user.pokemon.remove(pokemon_id)
+        request.user.save()
+        # we don't want to return the number on so we need to grab this 
+        # pokemon from the database
+        pokemon = Pokemon.objects.get(id = pokemon_id)
+        return Response(f"{pokemon.name} has been removed from your team")
+```
+
+
 
 ## External Resources
 
 - [django auth docs](https://docs.djangoproject.com/en/4.0/topics/auth/default/)
 
-## Assignments
-
-- Add sign up, login, and log out functionality to these exercises:
-  - [To-do List](https://github.com/tangoplatoon/django-to-do)
-  - [Event Calendar](https://github.com/tangoplatoon/django-event-calendar)

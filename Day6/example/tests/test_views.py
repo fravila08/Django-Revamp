@@ -3,7 +3,7 @@ from django.test import TestCase, Client
 # We can't make calls ourselves to this api so we will utilize reverse to mock this behavior
 from django.urls import reverse
 # we can import all the expected answers from our answer.py file
-from tests.answers import all_pokemon, a_pokemon, all_moves, a_move, updated_pokemon, updated_move
+from tests.answers import all_pokemon, a_pokemon, all_moves, a_move, updated_pokemon, updated_move, new_move
 import json
 
 
@@ -94,3 +94,18 @@ class Test_views(TestCase):
         response = self.client.delete(reverse('selected_pokemon', args=['geodude']))
         response = json.loads(response.content)
         self.assertEquals(response, "Geodude was deleted")
+
+    def test_009_create_a_move(self):
+        response = self.client.post(reverse('all_moves'), data={
+            "name":"Solar Beam"
+        }, content_type="application/json")
+        move = json.loads(response.content)
+        self.assertEquals(move, new_move)
+
+    def test_010_delete_a_move(self):
+        self.client.post(reverse('all_moves'), data={
+            "name":"Solar Beam"
+        }, content_type="application/json")
+        response = self.client.delete(reverse('selected_move', args=['Solar Beam']))
+        response = json.loads(response.content)
+        self.assertEquals(response, "Solar Beam was deleted")

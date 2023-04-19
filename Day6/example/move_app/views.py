@@ -18,6 +18,13 @@ class All_moves(APIView):
         # utilize json.loads to turn moves into JSON Data
         moves = json.loads(moves)
         return Response(moves)
+    
+    def post(self, request):
+        new_move = Move.objects.create(**request.data)
+        new_move.save()
+        new_move.full_clean()
+        new_move = json.loads(serialize('json', [new_move]))
+        return Response(new_move)
 
 
 class Selected_move(APIView):
@@ -37,3 +44,8 @@ class Selected_move(APIView):
         move.save()
         move = json.loads(serialize('json', [move]))
         return Response(move)
+    
+    def delete(self, request, name):
+        move = self.get_a_move(name)
+        move.delete()
+        return Response(f"{name} was deleted")

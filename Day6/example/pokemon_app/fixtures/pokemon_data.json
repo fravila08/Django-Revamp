@@ -4,15 +4,16 @@
   "pk": 1,
   "fields": {
     "name": "Pikachu",
-    "level": 12,
+    "level": 25,
     "date_encountered": "2008-01-01",
     "date_captured": "2023-04-14T05:16:41Z",
     "description": "Pikachu is an electric type pokemon who needs a thrunder stone to evolve into Raichu.",
     "captured": true,
     "moves": [
-      13,
       4,
-      12
+      12,
+      13,
+      6
     ]
   }
 },

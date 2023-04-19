@@ -11,3 +11,4 @@ updated_pokemon = [{"model": "pokemon_app.pokemon", "pk": 1, "fields": {"name": 
                                                                         "description": "Pikachu is an electric type pokemon who needs a thrunder stone to evolve into Raichu.", "captured": True, "moves": [12, 4, 13, 6]}}]
 updated_move = [{"model":"move_app.move","pk":11,"fields":{"name":"Blizzard","accuracy":60,"maxPP":10,"pp":7,"power":120}}]
 
+new_move = [{"model":"move_app.move","pk":14,"fields":{"name":"Solar Beam","accuracy":70,"maxPP":20,"pp":20,"power":80}}]
